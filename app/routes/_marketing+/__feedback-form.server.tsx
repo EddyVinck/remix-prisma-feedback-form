@@ -34,7 +34,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		)
 	}
 
-	const { id: feedbackId, title, content, evaluation } = submission.value
+	const { id: feedbackId, content, evaluation } = submission.value
 
 	const updatedFeedback = await prisma.feedback.upsert({
 		select: { id: true, owner: { select: { username: true } } },
@@ -42,11 +42,9 @@ export async function action({ request }: ActionFunctionArgs) {
 		create: {
 			ownerId: userId,
 			evaluation,
-			title,
 			content,
 		},
 		update: {
-			title,
 			content,
 			evaluation,
 		},
