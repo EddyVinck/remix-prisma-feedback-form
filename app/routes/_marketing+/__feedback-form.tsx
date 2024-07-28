@@ -11,9 +11,7 @@ import { type SerializeFrom } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
 import { ErrorList, Field, TextareaField } from '#app/components/forms.tsx'
-import { Button } from '#app/components/ui/button.tsx'
 import { Label } from '#app/components/ui/label.js'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { useIsPending } from '#app/utils/misc.tsx'
@@ -54,7 +52,7 @@ export function FeedbackForm({
 			<FormProvider context={form.context}>
 				<Form
 					method="POST"
-					className="flex h-full flex-col gap-y-4 overflow-y-auto overflow-x-hidden px-6 pb-28 pt-12"
+					className="flex h-full flex-col gap-y-4 overflow-y-auto overflow-x-hidden px-6 py-12"
 					{...getFormProps(form)}
 				>
 					{/*
@@ -84,7 +82,7 @@ export function FeedbackForm({
 								labelProps={{
 									children: '👍',
 									className:
-										'cursor-pointer border-2 border-white dark:border-slate-700 peer-checked:bg-slate-800 dark:peer-checked:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-sm text-lg peer flex justify-center items-center size-12',
+										'cursor-pointer border-2 border-white dark:border-slate-700 peer-checked:bg-white dark:peer-checked:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-sm text-lg peer flex justify-center items-center size-12',
 									htmlFor: 'evaluation-true',
 								}}
 								// errors={fields.evaluation.errors}
@@ -104,7 +102,7 @@ export function FeedbackForm({
 									htmlFor: 'evaluation-false',
 									children: '👎',
 									className:
-										'cursor-pointer border-2 border-white dark:border-slate-700 peer-checked:bg-slate-800 dark:peer-checked:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-sm text-lg peer flex justify-center items-center size-12',
+										'cursor-pointer border-2 border-white dark:border-slate-700 peer-checked:bg-white dark:peer-checked:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-sm text-lg peer flex justify-center items-center size-12',
 								}}
 								// errors={fields.evaluation.errors}
 							/>
@@ -126,12 +124,8 @@ export function FeedbackForm({
 						errors={fields.content.errors}
 					/>
 					<ErrorList id={form.errorId} errors={form.errors} />
-				</Form>
-				<div className={floatingToolbarClassName}>
-					<Button variant="destructive" {...form.reset.getButtonProps()}>
-						Reset
-					</Button>
 					<StatusButton
+						className="relative"
 						form={form.id}
 						type="submit"
 						disabled={isPending}
@@ -139,7 +133,7 @@ export function FeedbackForm({
 					>
 						Submit
 					</StatusButton>
-				</div>
+				</Form>
 			</FormProvider>
 		</div>
 	)
