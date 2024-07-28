@@ -172,9 +172,9 @@ model Connection {
 }
 
 model Feedback {
-  id         String  @id @default(cuid())
+  id         String @id @default(cuid())
   content    String
-  evaluation Boolean
+  evaluation String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

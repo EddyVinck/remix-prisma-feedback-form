@@ -5,6 +5,35 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { FeedbackSchema } from './__feedback-form.tsx'
 
+async function sendDiscordMessage(message: string) {
+	const webhookUrl = process.env.DISCORD_WEBHOOK_URL
+	if (!webhookUrl) {
+		console.error('DISCORD_WEBHOOK_URL is not set')
+		return
+	}
+	const payload = {
+		content: message,
+	}
+
+	try {
+		const response = await fetch(webhookUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(payload),
+		})
+
+		if (response.ok) {
+			console.log('Message sent successfully')
+		} else {
+			console.error('Failed to send message:', response.statusText)
+		}
+	} catch (error) {
+		console.error('Error sending message:', error)
+	}
+}
+
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
@@ -36,6 +65,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	const { id: feedbackId, content, evaluation } = submission.value
 
+	console.log('👀', evaluation)
 	const updatedFeedback = await prisma.feedback.upsert({
 		select: { id: true, owner: { select: { username: true } } },
 		where: { id: feedbackId ?? '__new_feedback__' },
@@ -50,12 +80,16 @@ export async function action({ request }: ActionFunctionArgs) {
 		},
 	})
 
-	return json(
-		{
-			result: updatedFeedback.id,
-		},
-		{
-			status: 200,
-		},
+	const emojiMap = {
+		positive: '👍',
+		negative: '👎',
+	}
+
+	const emoji = emojiMap[evaluation as keyof typeof emojiMap] || '💬'
+
+	await sendDiscordMessage(
+		`**${emoji} New feedback from ${updatedFeedback.owner.username}**\n\n${content}`,
 	)
+
+	return redirect('/')
 }

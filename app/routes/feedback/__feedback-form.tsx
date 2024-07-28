@@ -9,6 +9,7 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type Feedback } from '@prisma/client'
 import { type SerializeFrom } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
+import { useRef } from 'react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList, Field, TextareaField } from '#app/components/forms.tsx'
@@ -23,7 +24,7 @@ const contentMaxLength = 10000
 export const FeedbackSchema = z.object({
 	id: z.string().optional(),
 	content: z.string().min(contentMinLength).max(contentMaxLength),
-	evaluation: z.boolean(),
+	evaluation: z.string(),
 })
 
 export function FeedbackForm({
@@ -32,6 +33,8 @@ export function FeedbackForm({
 	feedback?: SerializeFrom<Feedback>
 }) {
 	const actionData = useActionData<typeof action>()
+	const formRef = useRef<HTMLFormElement>(null)
+
 	const isPending = useIsPending()
 
 	const [form, fields] = useForm({
@@ -41,9 +44,7 @@ export function FeedbackForm({
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: FeedbackSchema })
 		},
-		defaultValue: {
-			...feedback,
-		},
+
 		shouldRevalidate: 'onBlur',
 	})
 
@@ -51,18 +52,12 @@ export function FeedbackForm({
 		<div className="fixed bottom-0 left-4 w-full max-w-[280px] rounded-lg bg-slate-100 dark:bg-slate-800">
 			<FormProvider context={form.context}>
 				<Form
+					ref={formRef}
 					action="/feedback"
 					method="POST"
 					className="flex h-full flex-col gap-y-4 overflow-y-auto overflow-x-hidden px-6 py-12"
 					{...getFormProps(form)}
 				>
-					{/*
-					TODO: remove  this if its not necessary
-					This hidden submit button is here to ensure that when the user hits
-					"enter" on an input field, the primary form function is submitted
-					rather than the first button in the form (which is delete/add image).
-				*/}
-					<button type="submit" className="hidden" />
 					{feedback ? (
 						<input type="hidden" name="id" value={feedback.id} />
 					) : null}
@@ -75,7 +70,7 @@ export function FeedbackForm({
 								inputProps={{
 									...getInputProps(fields.evaluation, {
 										type: 'radio',
-										value: true,
+										value: 'positive',
 									}),
 									id: 'evaluation-true',
 									className: 'peer sr-only',
@@ -94,7 +89,7 @@ export function FeedbackForm({
 								inputProps={{
 									...getInputProps(fields.evaluation, {
 										type: 'radio',
-										value: false,
+										value: 'negative',
 									}),
 									id: 'evaluation-false',
 									className: 'sr-only peer',
