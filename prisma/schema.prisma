@@ -2,13 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -24,6 +24,7 @@ model User {
   image       UserImage?
   password    Password?
   notes       Note[]
+  feedbacks   Feedback[]
   roles       Role[]
   sessions    Session[]
   connections Connection[]
@@ -168,4 +169,20 @@ model Connection {
   userId String
 
   @@unique([providerName, providerId])
+}
+
+model Feedback {
+  id         String  @id @default(cuid())
+  title      String
+  content    String
+  evaluation Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId String
+
+  @@index([ownerId])
+  @@index([ownerId, updatedAt])
 }

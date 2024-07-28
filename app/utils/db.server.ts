@@ -9,6 +9,11 @@ import ws from 'ws'
 neonConfig.webSocketConstructor = ws
 const connectionString = `${process.env.DATABASE_URL}`
 
+const pool = new Pool({
+	connectionString,
+})
+const adapter = new PrismaNeon(pool)
+
 export const prisma = remember('prisma', () => {
 	// NOTE: if you change anything in this function you'll need to restart
 	// the dev server to see your changes.
@@ -16,8 +21,6 @@ export const prisma = remember('prisma', () => {
 	// Feel free to change this log threshold to something that makes sense for you
 	const logThreshold = 20
 
-	const pool = new Pool({ connectionString })
-	const adapter = new PrismaNeon(pool)
 	const client = new PrismaClient({
 		adapter,
 		log: [

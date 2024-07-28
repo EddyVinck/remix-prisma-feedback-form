@@ -229,6 +229,23 @@ function App() {
 					<Outlet />
 				</div>
 
+				<div>
+					<p>Feedback</p>
+					{user ? (
+						<Button variant="default" size="lg">
+							Provide feedback
+						</Button>
+					) : (
+						<div>
+							<p>Have feedback?</p>
+							<Button asChild variant="default" size="lg">
+								<Link to="/login">Log In </Link>
+							</Button>
+						</div>
+					)}
+					<p>Hello?</p>
+				</div>
+
 				<div className="container flex justify-between pb-5">
 					<Logo />
 					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
