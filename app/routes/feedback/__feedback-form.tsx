@@ -15,7 +15,7 @@ import { ErrorList, Field, TextareaField } from '#app/components/forms.tsx'
 import { Label } from '#app/components/ui/label.js'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { useIsPending } from '#app/utils/misc.tsx'
-import { type action } from './__feedback-form.server'
+import { type action } from '.'
 
 const contentMinLength = 1
 const contentMaxLength = 10000
@@ -51,6 +51,7 @@ export function FeedbackForm({
 		<div className="fixed bottom-0 left-4 w-full max-w-[280px] rounded-lg bg-slate-100 dark:bg-slate-800">
 			<FormProvider context={form.context}>
 				<Form
+					action="/feedback"
 					method="POST"
 					className="flex h-full flex-col gap-y-4 overflow-y-auto overflow-x-hidden px-6 py-12"
 					{...getFormProps(form)}

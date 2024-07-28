@@ -50,7 +50,12 @@ export async function action({ request }: ActionFunctionArgs) {
 		},
 	})
 
-	return redirect(
-		`/users/${updatedFeedback.owner.username}/feedbacks/${updatedFeedback.id}`,
+	return json(
+		{
+			result: updatedFeedback.id,
+		},
+		{
+			status: 200,
+		},
 	)
 }
