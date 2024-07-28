@@ -230,13 +230,9 @@ function App() {
 					<Outlet />
 				</div>
 
-				<div>
-					<p>Feedback</p>
+				<div className="fixed bottom-0 left-4 bg-slate-50 dark:bg-slate-900">
 					{user ? (
 						<>
-							<Button variant="default" size="lg">
-								Provide feedback
-							</Button>
 							<FeedbackForm />
 						</>
 					) : (
@@ -247,7 +243,6 @@ function App() {
 							</Button>
 						</div>
 					)}
-					<p>Hello?</p>
 				</div>
 
 				<div className="container flex justify-between pb-5">
