@@ -2,9 +2,10 @@ import { remember } from '@epic-web/remember'
 import { Pool, neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
+import { withPulse } from '@prisma/extension-pulse'
 
-import chalk from 'chalk'
 import ws from 'ws'
+import { sendDiscordMessage } from './discord'
 
 neonConfig.webSocketConstructor = ws
 const connectionString = `${process.env.DATABASE_URL}`
@@ -15,12 +16,6 @@ const pool = new Pool({
 const adapter = new PrismaNeon(pool)
 
 export const prisma = remember('prisma', () => {
-	// NOTE: if you change anything in this function you'll need to restart
-	// the dev server to see your changes.
-
-	// Feel free to change this log threshold to something that makes sense for you
-	const logThreshold = 20
-
 	const client = new PrismaClient({
 		adapter,
 		log: [
@@ -28,22 +23,34 @@ export const prisma = remember('prisma', () => {
 			{ level: 'error', emit: 'stdout' },
 			{ level: 'warn', emit: 'stdout' },
 		],
-	})
-	client.$on('query', async (e) => {
-		if (e.duration < logThreshold) return
-		const color =
-			e.duration < logThreshold * 1.1
-				? 'green'
-				: e.duration < logThreshold * 1.2
-					? 'blue'
-					: e.duration < logThreshold * 1.3
-						? 'yellow'
-						: e.duration < logThreshold * 1.4
-							? 'redBright'
-							: 'red'
-		const dur = chalk[color](`${e.duration}ms`)
-		console.info(`prisma:query - ${dur} - ${e.query}`)
-	})
+	}).$extends(
+		withPulse({
+			apiKey: process.env['PULSE_API_KEY'] as string,
+		}),
+	)
+
 	void client.$connect()
 	return client
 })
+
+async function prismaFeedbackStream() {
+	console.log('setting up feedback stream')
+	const stream = await prisma.feedback.stream()
+
+	const emojiMap = {
+		positive: '👍',
+		negative: '👎',
+	}
+
+	for await (const event of stream) {
+		if ('created' in event) {
+			const { content, evaluation } = event.created
+			const emoji = emojiMap[evaluation as keyof typeof emojiMap] || '💬'
+
+			await sendDiscordMessage(`**${emoji} new feedback**\n\n${content}`)
+		}
+		console.log('New event:', event)
+	}
+}
+
+void prismaFeedbackStream()
